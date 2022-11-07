@@ -46,14 +46,65 @@ fs.readdir(folderCss, (err, files) => {
   });
 });
 
-/*2. Заменяет шаблонные теги в файле **template.html** с названиями файлов из папки components (пример:```{{section}}```) на содержимое одноимённых компонентов и  сохраняет результат в **project-dist/index.html**.*/
+/*2. Заменяет шаблонные теги в файле **template.html** с названиями файлов из папки components (пример:```{{section}}```) на содержимое одноимённых компонентов и сохраняет результат в **project-dist/index.html**.*/
+fs.copyFile(
+  `${__dirname}\\template.html`,
+  `${folderProjectDist}\\index.html`,
+  (err) => {}
+);
 
-/*
-1. Импорт всех требуемых модулей
-2. Прочтение и сохранение в переменной файла-шаблона
-3. Нахождение всех имён тегов в файле шаблона
-4. Замена шаблонных тегов содержимым файлов-компонентов
-5. Запись изменённого шаблона в файл **index.html** в папке **project-dist**
-6. Использовать скрипт написанный в задании **05-merge-styles** для создания файла **style.css**
-7. Использовать скрипт из задания **04-copy-directory** для переноса папки **assets** в папку project-dist
-*/
+let result = "";
+
+const readableStream = fs.ReadStream(`${folderProjectDist}\\index.html`);
+readableStream.on("readable", function () {
+  let fileText = readableStream.read();
+  if (fileText != null) {
+    result += fileText;
+  }
+});
+
+readableStream.on("end", function () {
+  fs.readdir(folderComponents, (err, files) => {
+    files.forEach((file) => {
+      fileName = file.split(".")[0];
+      fileExtention = file.split(".")[1];
+      if (fileExtention === "html") {
+        targetFile = `${folderProjectDist}\\index.html`; /*Шаблон*/
+        checkIfContains(file, fileName);
+      }
+    });
+  });
+});
+
+async function checkIfContains(file, fileName) {
+  file = path.join(folderComponents, file); /*Вставляемый файл*/
+  targetFile = `${folderProjectDist}\\index.html`; /*Шаблон*/
+
+  fs.readFile(`${targetFile}`, "utf8", function (err, data) {
+    if (data.includes(`{{${fileName}}}`)) {
+      fs.readFile(`${file}`, "utf8", function (err, data2) {
+        replace(data2, fileName);
+        checkNewIndex(data, data2, fileName);
+      });
+    }
+  });
+}
+
+function replace(data2, fileName) {
+  result = result.replace(`{{${fileName}}}`, data2);
+  fs.writeFile(`${folderProjectDist}\\index.html`, result, (err) => {});
+  return new Promise((resolve) => {
+    resolve("Done");
+  });
+}
+
+async function checkNewIndex(data, data2, fileName) {
+  let check = await replace(data, data2, fileName);
+  if (check === "Done") {
+    writeNewIndex();
+  }
+}
+
+async function writeNewIndex() {
+  fs.writeFile(`${folderProjectDist}\\index.html`, result, (err) => {});
+}
