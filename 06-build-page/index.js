@@ -8,7 +8,10 @@ const fs = require("fs");
 const fsPromises = require("fs").promises;
 
 /*1. Создаёт папку  **project-dist**.*/
-fs.mkdirSync(folderProjectDistAssets, { recursive: true });
+fs.mkdir(folderProjectDist, (err) => {
+});
+fs.mkdir(folderProjectDistAssets, (err) => {
+});
 
 fs.writeFile(`${folderProjectDist}\\style.css`, "", (err) => {});
 
