@@ -5,10 +5,21 @@ const fs = require("fs");
 const fsPromises = require("fs").promises;
 
 fs.mkdir(folderCopy, (err) => {
-});
-
-fs.readdir(folder, (err, files) => {
-  files.forEach((file) => {
-    fsPromises.copyFile(`${folder}//${file}`, `${folderCopy}//${file}`);
+  fs.readdir(folderCopy, (err, files) => {
+    clearFiles(files);
+    copyFiles(files);
   });
 });
+
+function clearFiles(files) {
+  files.forEach((file) => {
+    fs.unlink(`${folderCopy}//${file}`, (err) => {});
+  });
+}
+function copyFiles(files) {
+  fs.readdir(folder, (err, files) => {
+    files.forEach((file) => {
+      fsPromises.copyFile(`${folder}//${file}`, `${folderCopy}//${file}`);
+    });
+  });
+}
